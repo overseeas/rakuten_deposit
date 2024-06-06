@@ -1,5 +1,5 @@
 import sys
-sys.path.append("C:/Users/LINK_RPA_001/Desktop/robocorp/modules/Tokko_Tencho")
+sys.path.append("../modules/Tokko_Tencho")
 print(sys.path)
 from robocorp.tasks import task
 from robocorp import windows
