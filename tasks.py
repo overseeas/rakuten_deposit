@@ -12,6 +12,31 @@ desktop = windows.desktop()
 def minimal_task():
     login_info = vault.get_secret("tokko")
 
+
+    #銀行
+    menu = Tokko_Tencho.Main()
+    menu.open()
+    menu.login(login_info["id"], login_info["password"])
+    menu.select_menu("受注一覧")
+
+    order = Tokko_Tencho.Order()
+    order.initialize()
+    order.option_text(0, "・処理状況（テキスト）", "入金待ち")
+    order.option_list(1, "楽天ステータス", "発送待ち")
+    order.input_order_number("r")
+    if order.search() > 0:
+        orders_list = order.get_values_from_list("ID")
+        orders = ", ".join(map(str, orders_list))
+
+        #発注分類：受注発注
+        status_change(orders, order, "受注発注")
+        #発注分類：直送
+        status_change(orders, order, "直送")
+        #発注分類：在庫品
+        status_change_direct(orders, order)
+    menu.close()
+
+    #コンビニ
     menu = Tokko_Tencho.Main()
     menu.open()
     menu.login(login_info["id"], login_info["password"])
@@ -34,7 +59,6 @@ def minimal_task():
         status_change(orders, order, "直送")
         #発注分類：在庫品
         status_change_direct(orders, order)
-
     menu.close()
 
 
@@ -44,7 +68,7 @@ def status_change(orders, order, option):
     order.option_text(0, "・処理状況（テキスト）", "入金待ち")
     order.option_list(1, "楽天ステータス", "発送待ち")
     order.input_order_id(orders)
-    order.option_text(0,"・発注分類", option)
+    order.option_text(2,"・発注分類", option)
     if order.search() > 0:
         order.list_all_click()
         subwindow = order.open_bulk_change()
@@ -70,7 +94,7 @@ def confirming_change(order, window):
     window.find("id:txtActionLog").set_value(datetime.date.strftime(datetime.datetime.now(), "%m/%d　発送待ち確認"))
     window.find("id:btnEditPlural").click()
     order.wait()
-    order.find("control:ButtonControl class:Button path:1|1|1").click()
+    window.find("control:ButtonControl class:Button path:1|1").click()
     order.wait()
-    order.find("control:ButtonControl class:Button path:1|1|1").click()
+    window.find("control:ButtonControl class:Button path:1|1").click()
     order.wait()
