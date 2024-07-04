@@ -6,12 +6,15 @@ from robocorp import vault
 import Tokko_Tencho
 import datetime
 from robocorp import log
+from RPA.Email.ImapSmtp import ImapSmtp
+from RPA.Outlook.Application import Application
+
 
 desktop = windows.desktop()
 @task
 def minimal_task():
     login_info = vault.get_secret("tokko")
-
+    
 
     #銀行
     menu = Tokko_Tencho.Main()
@@ -35,6 +38,7 @@ def minimal_task():
         #発注分類：在庫品
         status_change_direct(orders, order)
     menu.close()
+    
 
     #コンビニ
     menu = Tokko_Tencho.Main()
@@ -61,7 +65,18 @@ def minimal_task():
         status_change_direct(orders, order)
     menu.close()
 
+    mailto("chumon@maido-diy.jp", "★完了報告★楽天入金処理完了報告", "楽天の銀行、コンビニ払いの入金処理しました。")
 
+def mailto(to, subject, body):
+    secrets = vault.get_secret("Mail")
+    app = Application()
+    app.open_application()
+    app.send_email(
+        recipients=to,
+        cc_recipients=["yang@proszet.com", "funaki@proszet.com"],
+        subject=subject,
+        body=body
+    )
 
 def status_change(orders, order, option):
     order.initialize()
