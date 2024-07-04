@@ -1,11 +1,11 @@
 import sys
 sys.path.append("../modules/Tokko_Tencho")
-print(sys.path)
 from robocorp.tasks import task
 from robocorp import windows
 from robocorp import vault
 import Tokko_Tencho
 import datetime
+from robocorp import log
 
 desktop = windows.desktop()
 @task
