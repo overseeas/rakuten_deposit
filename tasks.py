@@ -9,14 +9,19 @@ from robocorp import log
 from RPA.Email.ImapSmtp import ImapSmtp
 from RPA.Outlook.Application import Application
 import traceback
+import holidays
 
 desktop = windows.desktop()
 @task
 def minimal_task():
-    login_info = vault.get_secret("tokko")
+
+    #check if today is working date
+    if datetime.date.strftime(datetime.datetime.now(), "%y-%m-%d") in holidays.JP() or datetime.datetime.today().weekday() in [5,6]:
+        return False
     
+    login_info = vault.get_secret("Tokko")
     bank = False
-    convinience = False
+    convinience = False    
 
     #銀行
     menu = Tokko_Tencho.Main()
@@ -39,7 +44,7 @@ def minimal_task():
             #発注分類：直送
             status_change(orders, order, "直送", "入金待ち")
             #発注分類：在庫品
-            status_change_direct(orders, order)
+            status_change_direct(orders, order, "入金待ち")
         bank = True
     except:
         traceback.print_tb()
@@ -76,9 +81,9 @@ def minimal_task():
     menu.close()
 
     if convinience and bank:
-        mailto("yang@proszet.com", "★完了報告★楽天入金処理完了報告", "楽天の銀行、コンビニ払いの入金処理しました。")
+        mailto("chumon@maido-diy.jp", "★完了報告★楽天入金処理完了報告", "楽天の銀行、コンビニ払いの入金処理しました。")
     else:
-        mailto("yang@proszet.com", "★エラー報告★楽天入金処理完了報告", "楽天の銀行、コンビニ払いの入金処理に失敗しました。")
+        mailto("chumon@maido-diy.jp", "★エラー報告★楽天入金処理完了報告", "楽天の銀行、コンビニ払いの入金処理に失敗しました。")
 
 def mailto(to, subject, body):
     secrets = vault.get_secret("Mail")
@@ -86,7 +91,7 @@ def mailto(to, subject, body):
     app.open_application()
     app.send_email(
         recipients=to,
-        #cc_recipients=["yang@proszet.com", "funaki@proszet.com"],
+        cc_recipients=["yang@proszet.com", "funaki@proszet.com"],
         subject=subject,
         body=body
     )
